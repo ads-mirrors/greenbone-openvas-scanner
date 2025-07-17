@@ -24,7 +24,7 @@ use scannerlib::scanner::{ScannerStackWithStorage, preferences};
 use scannerlib::scheduling::SchedulerStorage;
 use scannerlib::storage::infisto::{ChaCha20IndexFileStorer, IndexedFileStorer};
 use storage::results::ResultCatcher;
-use storage::{FromConfigAndFeeds, ResultHandler, Storage};
+use storage::{FromConfigAndFeeds, Storage};
 use tls::tls_config;
 use tracing::{info, metadata::LevelFilter, warn};
 use tracing_subscriber::EnvFilter;
@@ -164,7 +164,7 @@ where
     St: FromConfigAndFeeds + storage::ResultHandler + Storage + Send + 'static + Sync,
 {
     let feeds = get_feeds(config);
-    let storage = St::from_config_and_feeds(config, feeds)?;
+    let storage = St::from_config_and_feeds(config, feeds).await?;
 
     match config.scanner.scanner_type {
         ScannerType::OSPD => {
@@ -177,7 +177,7 @@ where
         }
         ScannerType::Openvasd => {
             let storage = std::sync::Arc::new(ResultCatcher::new(storage));
-            let scanner = make_openvasd_scanner(config, storage.underlying_storage().clone());
+            let scanner = make_openvasd_scanner(config, storage.clone());
             run_with_scanner_and_storage(scanner, storage, config).await
         }
     }
