@@ -1243,7 +1243,8 @@ nasl_update_table_driven_lsc_data (lex_ctxt *lexic)
  *
  * @param[in] lexic  Lexical context of the NASL interpreter.
  *
- * @return NULL
+ * @return List of Notus results in a JSON-like format, where the first
+ *         element is always a return code.
  */
 tree_cell *
 table_driven_lsc (lex_ctxt *lexic)
