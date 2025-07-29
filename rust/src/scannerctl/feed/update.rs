@@ -39,7 +39,6 @@ where
             }
         }
     }
-
     updater.perform_update().await?;
 
     Ok(())

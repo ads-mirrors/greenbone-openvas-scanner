@@ -111,13 +111,15 @@ fn run_get(
     let program = args.pop().unwrap_or_default();
     args.reverse();
     let start = Instant::now();
-    let status = Command::new(program)
+    let output = Command::new(program)
         .args(args)
-        .status()
+        .output()
         .expect("program should be executable");
     let elapsed = start.elapsed();
     println!("{cmd} took {elapsed:?}");
-    if !status.success() {
+    if !output.status.success() {
+        println!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
+        println!("STDERR: {}", String::from_utf8_lossy(&output.stderr));
         panic!("failed to execute {cmd}: {cmd}")
     }
     get(kb).map(|x| (elapsed, x))

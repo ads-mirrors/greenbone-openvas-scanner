@@ -223,12 +223,14 @@ where
     }
 
     async fn next(&mut self) -> Option<Result<String, Error>> {
+        println!("NEXT.");
         match self.verifier.find(|x| {
             x.as_ref()
                 .map(|x| x.get_filename().ends_with(".nasl"))
                 .unwrap_or(true)
         }) {
             Some(Ok(k)) => {
+                println!("OK: {}", k.file_name);
                 if let Err(e) = k.verify() {
                     return Some(Err(e.into()));
                 }
@@ -243,13 +245,19 @@ where
                 self.single(&k)
                     .await
                     .map(|_| k.0.clone())
-                    .map_err(|kind| Error {
-                        kind,
-                        key: k.0.clone(),
+                    .map_err(|kind| {
+                        println!("OK ERR: {}", k.0);
+                        Error {
+                            kind,
+                            key: k.0.clone(),
+                        }
                     })
                     .into()
             }
-            Some(Err(e)) => Some(Err(e.into())),
+            Some(Err(e)) => {
+                println!("ERR: {}", e);
+                Some(Err(e.into()))
+            }
             None if !self.feed_version_set => {
                 let result = self.dispatch_feed_info().await.map_err(|kind| Error {
                     kind,
